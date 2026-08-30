@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RakshaNet 2.0</title>
+    <script src="https://jsdelivr.net"></script>
+    <link rel="stylesheet" href="https://unpkg.com" />
+    <script src="https://unpkg.com"></script>
+    <script src="https://unpkg.com"></script>
+    <style>
+        .mesh-gradient { background-color: #0b1329; background-image: radial-gradient(at 10% 20%, rgba(31, 41, 55, 0.7) 0px, transparent 50%), radial-gradient(at 90% 10%, rgba(239, 68, 68, 0.15) 0px, transparent 40%); }
+        .glass { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    </style>
+</head>
+<body class="mesh-gradient text-slate-100 min-h-screen">
+    <header class="glass sticky top-0 z-40 px-6 py-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="shield-alert" class="text-red-500"></i> RakshaNet 2.0</h1>
+        <span class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full flex items-center gap-1"><span class="w-2 h-2 bg-emerald-400 rounded-full animate-ping"></span> Public Server Online</span>
+    </header>
+    
+    <main class="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="glass p-6 rounded-2xl space-y-4">
+            <h2 class="text-lg font-bold flex items-center gap-2"><i data-lucide="radio" class="text-emerald-400"></i> Emergency Check-In</h2>
+            <div class="grid grid-cols-3 gap-2">
+                <button onclick="setStatus('safe')" id="btn-safe" class="p-3 bg-emerald-500/20 text-emerald-400 border border-emerald-500 rounded-xl font-bold text-sm">Safe</button>
+                <button onclick="setStatus('help')" id="btn-help" class="p-3 bg-white/5 border border-white/10 rounded-xl text-slate-400 text-sm">Need Help</button>
+                <button onclick="setStatus('shelter')" id="btn-shelter" class="p-3 bg-white/5 border border-white/10 rounded-xl text-slate-400 text-sm">At Shelter</button>
+            </div>
+            <input type="text" id="note" placeholder="Optional details..." class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm focus:outline-none focus:border-emerald-500">
+            <button onclick="submitSignal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold p-3 rounded-xl transition">Transmit Signal</button>
+        </div>
+
+        <div class="glass p-4 rounded-2xl">
+            <div id="map" class="w-full h-[300px] rounded-xl bg-slate-900 border border-white/10"></div>
+        </div>
+    </main>
+
+    <script>
+        let currentStatus = 'safe';
+        function setStatus(type) {
+            currentStatus = type;
+            ['safe', 'help', 'shelter'].forEach(t => {
+                const btn = document.getElementById(`btn-${t}`);
+                if (t === type) {
+                    btn.className = `p-3 bg-${t === 'safe' ? 'emerald' : t === 'help' ? 'red' : 'blue'}-500/20 text-${t === 'safe' ? 'emerald' : t === 'help' ? 'red' : 'blue'}-400 border border-${t === 'safe' ? 'emerald' : t === 'help' ? 'red' : 'blue'}-500 rounded-xl font-bold text-sm`;
+                } else {
+                    btn.className = "p-3 bg-white/5 border border-white/10 rounded-xl text-slate-400 text-sm";
+                }
+            });
+        }
+
+        async function submitSignal() {
+            const message = document.getElementById('note').value;
+            const res = await fetch('/api/checkin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: currentStatus, message })
+            });
+            const data = await res.json();
+            if(data.success) {
+                alert("Signal transmitted to live database successfully!");
+                document.getElementById('note').value = "";
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            const map = L.map('map').setView([18.97, 72.85], 13);
+            L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png').addTo(map);
+            L.marker([18.97, 72.85]).addTo(map).bindPopup('Your Current Incident Location').openPopup();
+        });
+    </script>
+</body>
+</html>
