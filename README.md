@@ -11,12 +11,7 @@ Modern rebuild of the INNOVIK 6.0 pitch.
 - **Admin Page**: pipeline visualization, live logs, hazard zone, shelter table, team dispatch, check-ins, damage assessment
 - **Safety**: Safe places auto-calculated by distance, shelter capacity tracking, evacuation routes
 
-## Run
-```
-cd backend
-npm install
-npm start
-```
+
 
 
 - Landing: /index.html
